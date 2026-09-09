@@ -362,7 +362,7 @@ export const getAlerts = query({
   handler: async (ctx) => {
     const campaigns = await ctx.db.query("campaigns").collect();
     const allRows = await ctx.db.query("dailyRows").collect();
-    if (allRows.length === 0) return [];
+    if (allRows.length === 0) return { alerts: [], thisFrom: "", thisTo: "", prevFrom: "", prevTo: "" };
 
     // find the two most recent complete weeks
     const sortedDates = [...new Set(allRows.map((r) => r.date))].sort();

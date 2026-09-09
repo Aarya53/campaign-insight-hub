@@ -417,15 +417,24 @@ function AlertsAndSummary({
   alertsLoading: boolean;
   summaryLoading: boolean;
 }) {
+  // Normalize: backend now returns { alerts, thisFrom, thisTo, prevFrom, prevTo }
+  // but handle legacy [] or undefined while data is hydrating
+  const alertList: any[] = Array.isArray(alertsData)
+    ? alertsData
+    : Array.isArray(alertsData?.alerts)
+      ? alertsData.alerts
+      : [];
+  const alertMeta = Array.isArray(alertsData) ? null : alertsData;
+
   return (
     <div className="space-y-3">
       {/* Alerts */}
       <div className="border border-border/60 bg-white dark:bg-card p-5">
         <SectionLabel
           action={
-            alertsData?.alerts?.length ? (
+            alertList.length ? (
               <span className="font-mono text-[10px] tracking-[0.08em] uppercase bg-red-50 border border-red-200 text-red-800 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900 px-2 py-1">
-                {alertsData.alerts.length} flagged
+                {alertList.length} flagged
               </span>
             ) : (
               <span className="font-mono text-[10px] tracking-[0.08em] uppercase bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900 px-2 py-1">
@@ -444,17 +453,17 @@ function AlertsAndSummary({
             <div className="h-16 bg-muted animate-pulse" />
             <div className="h-16 bg-muted animate-pulse" />
           </div>
-        ) : !alertsData || alertsData.alerts.length === 0 ? (
+        ) : alertList.length === 0 ? (
           <div className="border border-dashed border-border p-6 text-center">
             <div className="font-mono text-[11px] tracking-[0.06em] text-muted-foreground">No campaigns dropped 15%+ WoW.</div>
-            <div className="font-mono text-[10px] text-muted-foreground/70 mt-1">Week {alertsData?.thisFrom ?? "—"} → {alertsData?.thisTo ?? "—"} vs prior</div>
+            <div className="font-mono text-[10px] text-muted-foreground/70 mt-1">Week {alertMeta?.thisFrom ?? "—"} → {alertMeta?.thisTo ?? "—"} vs prior</div>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="font-mono text-[10px] tracking-[0.06em] text-muted-foreground">
-              {alertsData.prevFrom} → {alertsData.prevTo} vs {alertsData.thisFrom} → {alertsData.thisTo}
+              {alertMeta?.prevFrom ?? "—"} → {alertMeta?.prevTo ?? "—"} vs {alertMeta?.thisFrom ?? "—"} → {alertMeta?.thisTo ?? "—"}
             </div>
-            {alertsData.alerts.map((a: any) => (
+            {alertList.map((a: any) => (
               <div key={a.campaign._id} className="border border-amber-200 bg-amber-50/70 dark:bg-amber-950/20 dark:border-amber-900/50 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
